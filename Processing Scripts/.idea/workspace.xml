@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="74e6ec7e-ab60-4c6a-8f48-9ee184748fbc" name="Changes" comment="" />
+    <list default="true" id="74e6ec7e-ab60-4c6a-8f48-9ee184748fbc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../2D Classifier/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../2D Classifier/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../2D Classifier/optimizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/../2D Classifier/data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../2D Classifier/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/../2D Classifier/feature_engineering.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
   <component name="ProjectId" id="1zi9b5MSmqdVcrp6vbYu5zMcIFj" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -16,7 +27,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Documents/crusher-vision-repository" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -64,6 +75,7 @@
       <workItem from="1634622334742" duration="100000" />
       <workItem from="1634622443991" duration="108000" />
       <workItem from="1634622926747" duration="810000" />
+      <workItem from="1637280376007" duration="2180000" />
     </task>
     <servers />
   </component>
