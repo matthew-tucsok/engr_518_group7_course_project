@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="74e6ec7e-ab60-4c6a-8f48-9ee184748fbc" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../2D Classifier/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../2D Classifier/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../2D Classifier/optimizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/../2D Classifier/data_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../2D Classifier/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/../2D Classifier/feature_engineering.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

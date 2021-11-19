@@ -33,7 +33,8 @@ class DataLoader:
         index = 0
         for sample in self.samples:
             img_array = np.array(sample[0])
-            img_vector = img_array.ravel()
+            img_vector = img_array.ravel()/255
             self.samples[index][0] = img_vector
             index += 1
+
 
