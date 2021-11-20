@@ -1,107 +1,104 @@
-import autograd.numpy as np
-from autograd import grad
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
+import numpy as np
+import time
+from numba import jit
 
 
-def model(x_p, w):
-    # compute linear comb and return
-    a = w[0] + np.dot(x_p, w[1:])
-    return a
-
-
-# define sigmoid
+@jit(nopython=True, parallel=True)
 def sigmoid(t):
     return 1 / (1 + np.exp(-t))
 
 
-# cross-entropy function
-def cross_entropy(w, x, y):
-    # compute sigmoid of model
-    a = sigmoid(model(x, w))
-    # compute cost of label 0 points
-    ind = np.argwhere(y == 0)[:, 0]
-    cost = -np.sum(np.log(1 - a[ind] + 1e-9))
-    # add cost of label 1 points
-    ind = np.argwhere(y == 1)[:, 0]
-    cost -= np.sum(np.log(a[ind]) + 1e-9)
-    # compute cross-entropy
-    return cost / y.size
+@jit(nopython=True, parallel=True)
+def regularized_cross_entropy_cost(y, weights, preds, lam, log_eps=1e-9):
+    return -1 / (len(y)) * np.sum(y * np.log(preds + log_eps) + (1 - y) * np.log(
+        1 - preds + log_eps) + lam * np.linalg.norm(weights[1:]))
+
+
+def find_gradient(weights, x_bar, y, eps, lam):
+    gradients = []
+    preds = sigmoid(np.dot(x_bar, weights))
+    fx = regularized_cross_entropy_cost(y, weights, preds, lam)
+    temp_weights = weights.copy()
+    for weight in range(len(weights)):
+        temp_weights[weight] += eps
+        preds = sigmoid(np.dot(x_bar, temp_weights))
+        fx_plus_eps = regularized_cross_entropy_cost(y, temp_weights, preds, lam)
+        gradients.append((fx_plus_eps - fx) / eps)
+        temp_weights[weight] -= eps
+    return np.array(gradients)
+
+
+@jit(nopython=True, parallel=True)
+def fast_find_gradient(weights, x_bar, y, eps, lam):
+    log_eps = 1e-9
+    gradients = []
+    preds = 1 / (1 + np.exp(-(np.dot(x_bar, weights))))
+    fx = regularized_cross_entropy_cost(y, weights, preds, lam)
+    temp_weights = weights.copy()
+    for weight in range(weights.shape[0]):
+        temp_weights[weight] += eps
+        preds = 1 / (1 + np.exp(-(np.dot(x_bar, temp_weights))))
+        fx_plus_eps = -1 / (y.shape[0]) * np.sum(
+            y * np.log(preds + log_eps) + (1 - y) * np.log(1 - preds + log_eps) + lam * np.linalg.norm(weights[1:]))
+        gradients.append((fx_plus_eps - fx) / eps)
+        temp_weights[weight] -= eps
+    return np.array(gradients)
 
 
 class Model:
-    def __init__(self, samples):
+    def __init__(self, samples, learning_rate, epsilon, batch_size=32):
         self.x, self.y = zip(*samples)
         self.x = np.array(self.x)
         self.y = np.array(self.y)
-        self.x_bar = np.hstack((np.ones([len(self.y), 1]), self.x))
+        num_samples = len(self.y)
+        self.x_bar = np.hstack((np.ones([num_samples, 1]), self.x))
         self.weights = np.zeros([self.x_bar.shape[1]])
+
         self.lam = 0
+        self.eps = epsilon
+        self.alpha = learning_rate
+        self.iterations = 100
+        self.batch_size = batch_size
+
+        self.num_batches = int(num_samples / self.batch_size)
+        total_rows = self.num_batches * self.batch_size
+        temp_x_bar = self.x_bar[:total_rows, :].copy()
+        temp_y = self.y[:total_rows].copy()
+        self.x_bar_batches = np.split(temp_x_bar, self.num_batches, axis=0)
+        self.y_batches = np.split(temp_y, self.num_batches, axis=0)
         self.gradient_descent()
 
-    @staticmethod
-    def sigmoid(t):
-        return 1 / (1 + np.exp(-t))
-
-    def c(self, t):
-        c = self.regularized_cross_entropy_cost()
-        return c
-
-    def regularized_cross_entropy_cost(self):
-        cost = -1 / float(len(self.y)) * np.sum(
-            self.y * np.log(Model.sigmoid(np.dot(self.x_bar, self.weights)) + 1e-9) + (1 - self.y) * np.log(
-                1 - Model.sigmoid(np.dot(self.x_bar, self.weights)) + 1e-9)) + self.lam * np.linalg.norm(
-            self.weights[1:])
-        return cost
-
     def gradient_descent(self):
-        grad_cross_entropy = grad(self.c)
-        yeezy = grad_cross_entropy(self.weights)
-        x = 1
-
-
-class InClassModel:
-    def __init__(self, samples):
-        self.x, self.y = zip(*samples)
-        self.x = np.array(self.x)
-        self.y = np.array(self.y)
-        self.x_bar = np.hstack((np.ones([len(self.y), 1]), self.x))
-        self.weights = np.ones([self.x_bar.shape[1]])
-        self.lam = 0
-        self.iterations = 1000
-
-        def c(t):
-            c = cross_entropy(t, self.x, self.y)
-            return c
-
-        weight_history, cost_history = self.gradient_descent(c, 'd', self.iterations, self.weights)
-        self.final_weights = weight_history[self.iterations]
-        plt.figure(0)
-        plt.plot(cost_history)
-        plt.show()
-
-    def gradient_descent(self, g, step, max_its, w):
-        # compute gradient
-        gradient = grad(g)
-        # gradient descent loop
-        weight_history = [w]  # weight history container
-        cost_history = [g(w)]  # cost history container
-        for k in range(max_its):
-            # eval gradient
-            grad_eval = gradient(w)
-            grad_eval_norm = grad_eval / np.linalg.norm(grad_eval)
-            # take grad descent step
-            if step == 'd':  # diminishing step
-                alpha = 1 / (k + 1)
-            else:  # constant step
-                alpha = step
-            w = w - alpha * grad_eval_norm
-            # record weight and cost
-            weight_history.append(w)
-            cost_history.append(g(w))
-        return weight_history, cost_history
+        start = time.time()
+        total = 0
+        for i in range(self.iterations):
+            print('Epoch:', i)
+            preds = sigmoid(np.dot(self.x_bar, self.weights))
+            print('Cost:', regularized_cross_entropy_cost(self.y, self.weights, preds, self.lam))
+            end = time.time()
+            duration = end - start
+            print('Execution time:', duration)
+            total += duration
+            start = time.time()
+            for batch in range(self.num_batches):
+                gradient = fast_find_gradient(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
+                                         self.lam)
+                gradient_norm = np.linalg.norm(gradient)
+                self.weights -= self.alpha * gradient / gradient_norm
+        print('Total execution for', self.iterations, 'iterations:', total)
 
     def accuracy(self, test_samples):
         x_tests, y_tests = zip(*test_samples)
-        predictions = sigmoid(model(x_tests, self.final_weights))
-        return confusion_matrix(y_tests, predictions)
+        x_bar_tests = np.hstack((np.ones([len(y_tests), 1]), x_tests))
+        predictions = sigmoid(np.dot(x_bar_tests, self.weights))
+        return Model.confusion_matrix(y_tests, predictions)
+
+    @staticmethod
+    def confusion_matrix(actuals, predictions):
+        thresh = predictions.round()
+        c11 = np.sum(np.logical_not(np.logical_or(actuals, thresh)))
+        c12 = np.sum(np.logical_and(np.logical_not(actuals), thresh))
+        c21 = np.sum(np.logical_and(actuals, np.logical_not(thresh)))
+        c22 = np.sum(np.logical_and(actuals, thresh))
+        matrix = np.array([[c11, c12], [c21, c22]])
+        return matrix

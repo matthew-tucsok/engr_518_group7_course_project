@@ -2,7 +2,7 @@ import os
 import random
 
 from data_loader import DataLoader
-from model import Model, InClassModel
+from model import Model
 
 
 def main():
@@ -10,17 +10,17 @@ def main():
     os.chdir(cwd)
     dataset = DataLoader(cwd + '/Greyscale Dataset')
     dataset.vectorize_data()
-    # print(len(dataset.samples[0][0]))
-    # print(dataset.samples[0][1])
+    random.shuffle(dataset.samples)
+    train_test_split = 0.75
+    split_index = round(len(dataset.samples)*train_test_split)
+    training_set = dataset.samples[:split_index]
+    test_set = dataset.samples[split_index:]
 
-    all_samples = dataset.samples
-    random.shuffle(all_samples)
-    train_number = round(len(all_samples)*0.75)
-    train_samples = all_samples[0:train_number]
-    test_samples = all_samples[train_number:]
-    classifier = InClassModel(train_samples)
-    confusion_matrix = classifier.accuracy(test_samples)
+    classifier = Model(training_set, 0.001, 1e-7)
+
+    confusion_matrix = classifier.accuracy(test_set)
     print(confusion_matrix)
+
 
 if __name__ == '__main__':
     main()
