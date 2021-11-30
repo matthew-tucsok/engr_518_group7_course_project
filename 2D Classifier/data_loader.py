@@ -1,6 +1,6 @@
 import glob
 
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 
 
@@ -15,8 +15,8 @@ class DataLoader:
     def load_data(self):
         files = glob.glob(self.source + '/*.png')
         for file in files:
-            img = Image.open(file)
-
+            img = Image.open(file).convert('L')
+            img = img.filter(ImageFilter.FIND_EDGES)
             splits = file.split('\\')
             class_and_index = splits[-1]
             label_name, _ = class_and_index.split('_', 2)
@@ -33,7 +33,7 @@ class DataLoader:
         index = 0
         for sample in self.samples:
             img_array = np.array(sample[0])
-            img_vector = img_array.ravel()/255
+            img_vector = img_array.ravel()
             self.samples[index][0] = img_vector
             index += 1
 

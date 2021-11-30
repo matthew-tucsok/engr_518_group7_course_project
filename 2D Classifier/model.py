@@ -11,7 +11,7 @@ def sigmoid(t):
 @jit(nopython=True, parallel=True)
 def regularized_cross_entropy_cost(y, weights, preds, lam, log_eps=1e-9):
     return -1 / (len(y)) * np.sum(y * np.log(preds + log_eps) + (1 - y) * np.log(
-        1 - preds + log_eps) + lam * np.linalg.norm(weights[1:]))
+        1 - preds + log_eps))
 
 
 def find_gradient(weights, x_bar, y, eps, lam):
