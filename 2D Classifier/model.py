@@ -54,10 +54,10 @@ class Model:
         self.x_bar = np.hstack((np.ones([num_samples, 1]), self.x))
         self.weights = np.zeros([self.x_bar.shape[1]])
 
-        self.lam = 0
+        self.lam = 10
         self.eps = epsilon
         self.alpha = learning_rate
-        self.iterations = 100
+        self.iterations = 10000
         self.batch_size = batch_size
 
         self.num_batches = int(num_samples / self.batch_size)
@@ -72,17 +72,18 @@ class Model:
         start = time.time()
         total = 0
         for i in range(self.iterations):
-            print('Epoch:', i)
-            preds = sigmoid(np.dot(self.x_bar, self.weights))
-            print('Cost:', regularized_cross_entropy_cost(self.y, self.weights, preds, self.lam))
-            end = time.time()
-            duration = end - start
-            print('Execution time:', duration)
-            total += duration
-            start = time.time()
+            if i % 100 == 0:
+                print('Epoch:', i)
+                preds = sigmoid(np.dot(self.x_bar, self.weights))
+                print('Cost:', regularized_cross_entropy_cost(self.y, self.weights, preds, self.lam))
+                end = time.time()
+                duration = end - start
+                print('Execution time:', duration)
+                total += duration
+                start = time.time()
             for batch in range(self.num_batches):
                 gradient = fast_find_gradient(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
-                                         self.lam)
+                                              self.lam)
                 gradient_norm = np.linalg.norm(gradient)
                 self.weights -= self.alpha * gradient / gradient_norm
         print('Total execution for', self.iterations, 'iterations:', total)
