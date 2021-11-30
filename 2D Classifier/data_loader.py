@@ -7,9 +7,7 @@ import numpy as np
 class DataLoader:
     def __init__(self, path):
         self.source = path
-
         self.samples = []
-
         self.load_data()
 
     def load_data(self):

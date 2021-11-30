@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import time
 from numba import jit
 
@@ -71,10 +72,12 @@ class Model:
     def gradient_descent(self):
         start = time.time()
         total = 0
+        history = []
         for i in range(self.iterations):
             print('Epoch:', i)
             preds = sigmoid(np.dot(self.x_bar, self.weights))
-            print('Cost:', regularized_cross_entropy_cost(self.y, self.weights, preds, self.lam))
+            cost = regularized_cross_entropy_cost(self.y, self.weights, preds, self.lam)
+            print('Cost:', cost)
             end = time.time()
             duration = end - start
             print('Execution time:', duration)
@@ -82,10 +85,20 @@ class Model:
             start = time.time()
             for batch in range(self.num_batches):
                 gradient = fast_find_gradient(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
-                                         self.lam)
+                                              self.lam)
                 gradient_norm = np.linalg.norm(gradient)
-                self.weights -= self.alpha * gradient / gradient_norm
-        print('Total execution for', self.iterations, 'iterations:', total)
+                self.weights -= self.alpha/(i+1) * gradient / gradient_norm
+            history.append((cost, self.weights, i))
+        print('Total execution for', self.iterations, 'Epochs:', total)
+        costs, weights, indices = zip(*history)
+        plt.plot(range(self.iterations), costs)
+        plt.xlabel('Epoch')
+        plt.ylabel('Cost')
+        plt.title('Cost vs Iterations')
+        plt.show()
+        history.sort(key=lambda tup: tup[0])
+        print('Best weights after epoch', history[0][2], 'with a cost of', history[0][0])
+        self.weights = history[0][1]
 
     def accuracy(self, test_samples):
         x_tests, y_tests = zip(*test_samples)
