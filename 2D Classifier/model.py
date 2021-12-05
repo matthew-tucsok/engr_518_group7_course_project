@@ -27,10 +27,10 @@ def find_gradient(weights, x_bar, y, eps, lam):
         gradients.append((fx_plus_eps - fx) / eps)
         temp_weights[weight] -= eps
     return np.array(gradients)
-	
-def find_gradient1(weights, x_bar, y, eps, lam):
-    gradients=(-1/y.shape[0])*np.matmul(x_bar.T,y-sigmoid(np.matmul(x_bar,weights)))
-    return np.array(gradients)
+
+
+def find_gradient_analytically(weights, x_bar, y, eps, lam):
+    return np.array(-1 / y.shape[0]) * np.matmul(x_bar.T, y - sigmoid(np.matmul(x_bar, weights)))
 
 
 @jit(nopython=True, parallel=True)
@@ -62,7 +62,7 @@ class Model:
         self.lam = 0
         self.eps = epsilon
         self.alpha = learning_rate
-        self.iterations = 100
+        self.iterations = 1000
         self.batch_size = batch_size
 
         self.num_batches = int(num_samples / self.batch_size)
@@ -78,20 +78,23 @@ class Model:
         total = 0
         history = []
         for i in range(self.iterations):
-            print('Epoch:', i)
+            if i % 1000 == 0:
+                print('Epoch:', i)
             preds = sigmoid(np.dot(self.x_bar, self.weights))
             cost = regularized_cross_entropy_cost(self.y, self.weights, preds, self.lam)
-            print('Cost:', cost)
+            if i % 1000 == 0:
+                print('Cost:', cost)
             end = time.time()
             duration = end - start
-            print('Execution time:', duration)
+            if i % 1000 == 0:
+                print('Execution time:', duration)
             total += duration
             start = time.time()
             for batch in range(self.num_batches):
-                gradient = find_gradient1(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
-                                              self.lam)
+                gradient = find_gradient_analytically(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
+                                                      self.lam)
                 gradient_norm = np.linalg.norm(gradient)
-                self.weights -= self.alpha/(i+1) * gradient / gradient_norm
+                self.weights -= self.alpha / (i + 1) * gradient / gradient_norm
             history.append((cost, self.weights, i))
         print('Total execution for', self.iterations, 'Epochs:', total)
         costs, weights, indices = zip(*history)
