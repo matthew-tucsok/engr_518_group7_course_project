@@ -14,8 +14,12 @@ class DataLoader:
         files = glob.glob(self.source + '/*.png')
         for file in files:
             img = Image.open(file).convert('L')
-            img = img.filter(ImageFilter.FIND_EDGES)
+            #img = img.filter(ImageFilter.FIND_EDGES)
+            img_h=np.array(img.histogram())
+            var=np.var(img_h)
+            mean=np.mean(img)
             splits = file.split('\\')
+	    
             class_and_index = splits[-1]
             label_name, _ = class_and_index.split('_', 2)
             label = None
@@ -25,7 +29,10 @@ class DataLoader:
                 label = 0
             else:
                 raise SyntaxError('Invalid class label detected')
-            self.samples.append([img, label])
+            print(var,mean,label)
+	    
+            #self.samples.append([img, label])
+            self.samples.append([var, label])
 
     def vectorize_data(self):
         index = 0
