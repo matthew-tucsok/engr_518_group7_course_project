@@ -27,6 +27,10 @@ def find_gradient(weights, x_bar, y, eps, lam):
         gradients.append((fx_plus_eps - fx) / eps)
         temp_weights[weight] -= eps
     return np.array(gradients)
+	
+def find_gradient1(weights, x_bar, y, eps, lam):
+    gradients=(-1/y.shape[0])*np.matmul(x_bar.T,y-sigmoid(np.matmul(x_bar,weights)))
+    return np.array(gradients)
 
 
 @jit(nopython=True, parallel=True)
@@ -84,7 +88,7 @@ class Model:
             total += duration
             start = time.time()
             for batch in range(self.num_batches):
-                gradient = fast_find_gradient(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
+                gradient = find_gradient1(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
                                               self.lam)
                 gradient_norm = np.linalg.norm(gradient)
                 self.weights -= self.alpha/(i+1) * gradient / gradient_norm
