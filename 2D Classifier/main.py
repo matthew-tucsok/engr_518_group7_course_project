@@ -14,6 +14,7 @@ def main():
     runs = 10
     accuracies = []
     for run in range(runs):
+        print('Run', run+1)
         dataset = DataLoader(cwd + '/Greyscale Dataset')
         train_test_split = 0.75
 
@@ -31,7 +32,7 @@ def main():
             else:
                 not_flat_label_count += 1
 
-        print(flat_label_count, 'flat images and', not_flat_label_ount, 'non-flat images in training set.')
+        print(flat_label_count, 'flat images and', not_flat_label_count, 'non-flat images in training set.')
 
         classifier = Model(training_set, 0.001, 1e-7)
 
