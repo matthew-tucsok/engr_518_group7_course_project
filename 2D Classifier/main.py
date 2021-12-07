@@ -4,16 +4,16 @@ import random
 from data_loader import DataLoader
 from model import Model
 
+import numpy as np
 
 
 def main():
     cwd = os.getcwd()
     os.chdir(cwd)
     dataset = DataLoader(cwd + '/Greyscale Dataset')
-    dataset.vectorize_data()
     random.shuffle(dataset.samples)
     train_test_split = 0.75
-    split_index = round(len(dataset.samples)*train_test_split)
+    split_index = round(len(dataset.samples) * train_test_split)
     training_set = dataset.samples[:split_index]
     test_set = dataset.samples[split_index:]
 
@@ -21,6 +21,8 @@ def main():
 
     confusion_matrix = classifier.accuracy(test_set)
     print(confusion_matrix)
+    accuracy = 100 * np.trace(confusion_matrix)/np.sum(confusion_matrix)
+    print('Accuracy:', accuracy, '%')
 
 
 if __name__ == '__main__':

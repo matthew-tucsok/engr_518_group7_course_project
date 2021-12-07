@@ -40,3 +40,9 @@ import numpy as np
 # c22 = np.sum(np.logical_and(a, c))
 # confusion_matrix = np.array([[c11, c12],[c21, c22]])
 # x = 1
+
+a = np.array([1, 2, 3])
+b = np.array([4, 5])
+
+c = np.hstack((a, b))
+print(c)
