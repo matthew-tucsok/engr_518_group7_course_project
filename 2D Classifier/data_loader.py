@@ -13,12 +13,13 @@ class DataLoader:
 
     def load_data(self):
         files = glob.glob(self.source + '/*.png')
+
         for file in files:
             img = Image.open(file).convert('L')
-            img = img.filter(ImageFilter.FIND_EDGES)
             img_h = np.array(img.histogram())
             var = np.var(img_h)
-            mean = np.mean(img)
+            img = img.filter(ImageFilter.FIND_EDGES)
+
             splits = file.split('\\')
 
             class_and_index = splits[-1]
@@ -30,7 +31,7 @@ class DataLoader:
                 label = 0
             else:
                 raise SyntaxError('Invalid class label detected')
-            self.calculated_features.append(np.array([var, mean]))
+            self.calculated_features.append(np.array([var]))
             # self.samples.append([img, label])
             self.samples.append([img, label])
 
@@ -38,6 +39,8 @@ class DataLoader:
         for sample in self.samples:
             img_array = np.array(sample[0])
             img_vector = img_array.ravel()
+            # img_vector = np.array([])
+            # self.calculated_features[index] = np.array([])
             sample_vector = np.hstack((img_vector, self.calculated_features[index]))
             self.samples[index][0] = sample_vector
             index += 1

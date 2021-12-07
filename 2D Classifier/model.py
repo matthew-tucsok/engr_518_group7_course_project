@@ -15,7 +15,7 @@ def regularized_cross_entropy_cost(y, weights, preds, lam, log_eps=1e-9):
         1 - preds + log_eps))
 
 
-def find_gradient(weights, x_bar, y, eps, lam):
+def find_gradient_numerically(weights, x_bar, y, eps, lam):
     gradients = []
     preds = sigmoid(np.dot(x_bar, weights))
     fx = regularized_cross_entropy_cost(y, weights, preds, lam)
@@ -29,13 +29,13 @@ def find_gradient(weights, x_bar, y, eps, lam):
     return np.array(gradients)
 
 
-def find_gradient1(weights, x_bar, y, eps, lam):
+def find_closed_form_gradient(weights, x_bar, y, eps, lam):
     gradients = (-1 / y.shape[0]) * np.matmul(x_bar.T, y - sigmoid(np.matmul(x_bar, weights)))
     return np.array(gradients)
 
 
 @jit(nopython=True, parallel=True)
-def fast_find_gradient(weights, x_bar, y, eps, lam):
+def fast_find_gradient_numerically(weights, x_bar, y, eps, lam):
     log_eps = 1e-9
     gradients = []
     preds = 1 / (1 + np.exp(-(np.dot(x_bar, weights))))
@@ -94,8 +94,8 @@ class Model:
                 start = time.time()
 
             for batch in range(self.num_batches):
-                gradient = find_gradient1(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
-                                          self.lam)
+                gradient = find_closed_form_gradient(self.weights, self.x_bar_batches[batch], self.y_batches[batch], self.eps,
+                                                     self.lam)
                 gradient_norm = np.linalg.norm(gradient)
                 self.weights -= self.alpha / (i + 1) * gradient / gradient_norm
             history.append((cost, self.weights, i))
@@ -108,10 +108,11 @@ class Model:
         plt.xlabel('Epoch')
         plt.ylabel('Cost')
         plt.title('Cost vs Iterations')
-        plt.show()
+        # plt.show()
         history.sort(key=lambda tup: tup[0])
         print('Best weights after epoch', history[0][2], 'with a cost of', history[0][0])
         self.weights = history[0][1]
+        x = 1
 
     def accuracy(self, test_samples):
         x_tests, y_tests = zip(*test_samples)
