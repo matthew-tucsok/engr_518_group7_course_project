@@ -13,7 +13,7 @@ class DataLoader:
         """
         Initializing the data loader to find the dataset images.
         :param path: Path to the root of the program. The root should contain the executing script, and a folder
-        named "Greyscale Dataset" which directly has the 4000 images in the dataset.
+        named "Greyscale Dataset" in it which contains the 4000 images in the dataset.
         """
         self.source = path
         self.samples = []  # List to hold the dataset samples
